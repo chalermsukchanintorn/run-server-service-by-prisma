@@ -37,14 +37,14 @@ exports.uploadRunner = multer({
 
 //สร้างฟังก์ชัน Create/Insert เพื่อเพิ่มข้อมูลลงตารางในฐานข้อมูล----------------
 exports.createRunner = async (req, res) => {
-    try{
+    try {
         //เอาข้อมูลที่ส่งมาจาก client/user เพิ่มลงตารางในฐานข้อมูล
         const result = await prisma.runner_tb.create({ //.create คือ การเพิ่ม
             data: {
                 runnerName: req.body.runnerName,
                 runnerUsername: req.body.runnerUsername,
                 runnerPassword: req.body.runnerPassword,
-                runnerImage: req.file ? req.file.path.replace("images\\runner\\","") : ""
+                runnerImage: req.file ? req.file.path.replace("images\\runner\\", "") : ""
             }
         });
 
@@ -53,7 +53,34 @@ exports.createRunner = async (req, res) => {
             message: 'Insert data successfully',
             data: result
         });
-    }catch(err){
+    } catch (err) {
+        res.status(500).json({ message: `ERROR:  ${err}` });
+    }
+}
+
+//สร้างฟังก์ชันตรวจสอบชื่อผู้ใช้รหัสผ่าน -----------
+exports.checkLoginRunner = async (req, res) => {
+    try {
+        const result = await prisma.runner_tb.findFirst({ //.create คือ การเพิ่ม
+            where: {
+                runnerUsername: req.params.runnerUsername,
+                runnerPassword: req.params.runnerPassword,
+            }
+        });
+
+        //ส่งผลการทำงานกลับไปยัง client/user
+        if (result) {
+            res.status(200).json({
+                message: 'username and password is correct',
+                data: result
+            });
+        }else{
+            res.status(404).json({
+                message: 'username and password is in-correct',
+                data: result
+            });
+        }
+    } catch (err) {
         res.status(500).json({ message: `ERROR:  ${err}` });
     }
 }

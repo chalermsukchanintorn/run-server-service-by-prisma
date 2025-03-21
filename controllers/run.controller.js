@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
     }
 });
 //2. ฟังก์ชันอัปโหลดไฟล์
-const uploadRun = multer({
+exports.uploadRun = multer({
     storage: storage,
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
     fileFilter: (req, file, cb) => {
@@ -35,3 +35,130 @@ const uploadRun = multer({
     }
 }).single('runImage');
 
+
+//สร้างฟังก์ชัน Create/Insert เพื่อเพิ่มข้อมูลลงตารางในฐานข้อมูล----------------
+exports.createRun = async (req, res) => {
+    try {
+        //เอาข้อมูลที่ส่งมาจาก client/user เพิ่มลงตารางในฐานข้อมูล
+        const result = await prisma.run_tb.create({ //.create คือ การเพิ่ม
+            data: {
+                dateRun: req.body.dateRun,
+                distanceRun: parseFloat(req.body.distanceRun),
+                placeRun: req.body.placeRun,
+                runImage: req.file ? req.file.path.replace("images\\run\\", "") : "",
+                runnerId: parseInt(req.body.runnerId),
+            }
+        });
+
+        //ส่งผลการทำงานกลับไปยัง client/user
+        res.status(201).json({
+            message: 'Insert data successfully',
+            data: result
+        });
+
+    } catch (err) {
+        res.status(500).json({ message: `ERROR:  ${err}` });
+    }
+}
+
+//สร้างฟังก์ชันดึงข้อมูลการวิ่งทั้งหมดของนักวิ่งหนึ่งๆ
+exports.getAllRunOfRunner = async (req, res) => {
+    try {
+        const result = await prisma.run_tb.findMany({
+            where: {
+                runnerId: parseInt(req.params.runnerId),
+            }
+        });
+
+        //ส่งผลการทำงานกลับไปยัง client/user
+        res.status(200).json({
+            message: 'username and password is correct',
+            data: result
+        });
+    } catch (err) {
+        res.status(500).json({ message: `ERROR:  ${err}` });
+    }
+}
+
+//สร้างฟังก์ชันลบข้อมูลการวิ่งหนึ่งๆ ของนักวิ่งห
+exports.deleteRunOfRunner = async (req, res) => {
+    try {
+        const result = await prisma.run_tb.delete({
+            where: {
+                runId: parseInt(req.params.runId),
+            }
+        });
+
+        //ส่งผลการทำงานกลับไปยัง client/user
+        res.status(200).json({
+            message: 'Delete Ok',
+            data: result
+        });
+    } catch (err) {
+        res.status(500).json({ message: `ERROR:  ${err}` });
+    }
+}
+
+//สร้างฟังก์ชันดึงข้อมูลการวิ่งหนึ่งๆ ของนักวิ่ง
+exports.getOneRunOfRunner = async (req, res) => {
+    try {
+        const result = await prisma.run_tb.findFirst({
+            where: {
+                runId: parseInt(req.params.runId),
+            }
+        });
+
+        //ส่งผลการทำงานกลับไปยัง client/user
+        res.status(200).json({
+            message: 'username and password is correct',
+            data: result
+        });
+    } catch (err) {
+        res.status(500).json({ message: `ERROR:  ${err}` });
+    }
+}
+
+//สร้างฟังก์ชันแก้ไขการวิ่งหนึ่งๆ ของนักวิ่ง
+exports.updateRunOfRunner = async (req, res) => {
+    try {
+        let result;
+        //เอาข้อมูลที่ส่งมาจาก client/user 
+        if (req.file) {
+            //แก้ไขแบบแก้ไขรูป
+            result = await prisma.run_tb.update({
+                where: {
+                    runId: parseInt(req.params.runId),
+                },
+                data: {
+                    dateRun: req.body.dateRun,
+                    distanceRun: parseFloat(req.body.distanceRun),
+                    placeRun: req.body.placeRun,
+                    runImage: req.file.path.replace("images\\run\\", ""),
+                    runnerId: parseInt(req.body.runnerId),
+                }
+            });
+        } else {
+            //แก้ไขแบบแก้ไขรูป
+            result = await prisma.run_tb.update({
+                where: {
+                    runId: parseInt(req.params.runId),
+                },
+                data: {
+                    dateRun: req.body.dateRun,
+                    distanceRun: parseFloat(req.body.distanceRun),
+                    placeRun: req.body.placeRun,
+                    runnerId: parseInt(req.body.runnerId),
+                }
+            });
+        }
+
+        //ส่งผลการทำงานกลับไปยัง client/user
+        res.status(201).json({
+            message: 'Update data successfully',
+            data: result
+        });
+
+    } catch (err) {
+        res.status(500).json({ message: `ERROR:  ${err}` });
+    }
+}

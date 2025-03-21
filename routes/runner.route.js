@@ -14,7 +14,9 @@ const router = express.Router();
 //เพิ่มข้อมูล
 router.post('/', runnerController.uploadRunner, runnerController.createRunner); 
 //แก้ไขข้อมูล
+
 //ตรวจสอบชื่อผู้ใช้ รหัสผ่าน
+router.get('/:runnerUsername/:runnerPassword', runnerController.checkLoginRunner);
 
 // export router เพื่อนำไปใช้ที่ server.js
 module.exports = router;

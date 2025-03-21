@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const runnerRouter = require('./routes/runner.route');
-// const runRouter = require('./routes/run.route');
+const runRouter = require('./routes/run.route');
 
 require('dotenv').config();
 
@@ -16,7 +16,12 @@ app.use(cors());
 app.use(express.json());
 //เส้นทาง
 app.use('/runner',runnerRouter);
-// app.use('/run', runRouter);
+app.use('/run', runRouter);
+//การเข้าถึงไฟล์ ในที่นี้คือรูป
+//การเข้าถึงไฟล์ ในที่นี้คือรูป
+const path = require('path');
+app.use('/images/runner', express.static(path.join(__dirname, 'images/runner')));
+app.use('/images/run', express.static(path.join(__dirname, 'images/run')));
 
 //เขียนคำสั่งเพื่อเทส เพื่อให้ client/user เข้าถึง resource ใน server
 app.get('/', (req, res) => {
